@@ -39,7 +39,7 @@ def train(opt,each_pth_folder,based_on_path):
     if opt.use_gpu:
         torch.cuda.manual_seed_all(opt.seed)
 
-    if len(opt.gpu_ids) == 0 and opt.use_gpu:
+    if opt.use_gpu:
         torch.cuda.set_device(opt.gpu_id)
 
     model = Model(opt, getattr(models, opt.model))
@@ -48,8 +48,6 @@ def train(opt,each_pth_folder,based_on_path):
         model.load(based_on_path)
     if opt.use_gpu:
         model.cuda()
-        if len(opt.gpu_ids) > 0:
-            model = nn.DataParallel(model, device_ids=opt.gpu_ids)
 
     if model.net.num_fea != opt.num_fea:
         raise ValueError(f"the num_fea of {opt.model} is error, please specific --num_fea={model.net.num_fea}")
@@ -214,8 +212,12 @@ def metric_df(model, data_loader, opt):
     pre_real_df['real'] = real_y_all
     pre_real_df['pre'] = pre_y_all
 
+    prediction_results_path = f'results/prediction_results'
+    if not os.path.exists(prediction_results_path):
+        os.makedirs(prediction_results_path, exist_ok=True)
+
     try:
-        final_df = pd.read_excel(f'{opt.prediction_results_path}/{opt.dataset}_final_df.xlsx')
+        final_df = pd.read_excel(f'{prediction_results_path}/{opt.dataset}_final_df.xlsx')
     except:
         final_df = pd.DataFrame(columns=['dataset','model','output','ui_merge','lr','MSE', 'MAE','RMSE'])
 
@@ -233,7 +235,7 @@ def metric_df(model, data_loader, opt):
         final_df.loc[index_num,MSE] = mean_squared_error(score_df['real'], score_df['pre'])
         final_df.loc[index_num, MAE] = mean_absolute_error(score_df['real'], score_df['pre'])
 
-    final_df.to_excel(f'{opt.prediction_results_path}/{opt.dataset}_final_df.xlsx', index=False)
+    final_df.to_excel(f'{prediction_results_path}/{opt.dataset}_final_df.xlsx', index=False)
     print(
         f"{opt.model}_evaluation reslut: test_mse: {average_mse:.4f}; test_mae: {average_mae:.4f}")
     return
@@ -265,8 +267,10 @@ def unpack_input(opt, x):
             type,month]
 
     ##,user_item_type,user_item_month,item_user_type,item_user_month
-
-    data = list(map(lambda x: torch.LongTensor(x).cuda(), data))
+    if opt.use_gpu:
+        data = list(map(lambda x: torch.LongTensor(x).cuda(), data))
+    else:
+        data = list(map(lambda x: torch.LongTensor(x), data))
     return data
 
 def model_run(model_name,num_fea,gpu_id,output,ui_merge,**kwargs):
@@ -277,7 +281,7 @@ def model_run(model_name,num_fea,gpu_id,output,ui_merge,**kwargs):
     opt.output = output
     opt.ui_merge = ui_merge
 
-    for data in ['Software_5']:  #,'Automotive_5','Software_5','Digital_Music_5','total',
+    for data in ['total']:
 
         for k_fold in range(1,opt.k_fold+1): #
             opt.dataset = f'{data}_{k_fold}'

@@ -519,8 +519,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
 
-    for data_file in ['Software_5.json']:
-    # for data_file in ['Gift_Cards_5.json']:
+    for data_file in ['total.csv']:
         word_dim = 300
         if data_file[-1] == 'v':
             data = pd.read_csv('given_data/'+data_file)
