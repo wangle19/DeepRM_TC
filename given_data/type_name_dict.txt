@@ -1,0 +1,1 @@
+{'All_Beauty_5.json': 'Size:', 'AMAZON_FASHION_5.json': 'Size:', 'Appliances_5.json': 'Size Name:', 'Arts_Crafts_and_Sewing_5.json': 'Size:', 'Automotive_5.json': 'Size:', 'Digital_Music_5.json': 'Format:', 'Gift_Cards_5.json': 'Gift Amount:', 'Software_5.json': 'Platform:','Electronics_5.json': 'Color:', 'Toys_and_Games_5.json': 'Color:','Movies_and_TV_5.json': 'Format:'}
